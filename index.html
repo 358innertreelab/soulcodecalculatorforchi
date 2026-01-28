@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生命密碼計算器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Shippori+Mincho+B1:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 視覺風格定義：日式侘寂風 (Wabi-Sabi) --- */
+        :root { 
+            --primary: #3E3A39;      /* 墨黑 */
+            --secondary: #78726B;    /* 亞麻灰 */
+            --bg: #F4F1E8;           /* 生成色 */
+            --card-bg: #FFFEFA;      /* 胡粉色 */
+            --border-color: #E0DED5; /* 灰白邊框 */
+            
+            --wabi-moss:#B22222;     /* 苔色 */
+            --wabi-indigo: #b5556b;  /* 錆淺蔥 */
+            --wabi-rust: #35346e;    /* 朽葉棕 */
+            --wabi-gold: #803528;    /* 砂色金 */
+            --wabi-go: #db9b59;      /* 金磚 */
+            
+            --highlight-pos: #b56355; /* 墨綠 */
+            --highlight-neg: #543b3e; /* 赤紅 */
+        }
+
+        body { 
+            font-family: "Shippori Mincho B1", "Noto Serif JP", "Microsoft JhengHei", serif; 
+            background-color: var(--bg); 
+            color: var(--primary); 
+            padding: 20px; 
+            line-height: 1.9; 
+            overflow-x: hidden; /* 避免撐開時出現卷軸 */
+        }
+
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: var(--card-bg); 
+            padding: 60px 50px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 20px rgba(62, 58, 57, 0.08); 
+            border: 1px solid var(--border-color);
+        }
+        
+        h1 { 
+            text-align: center; 
+            color: var(--primary); 
+            margin-bottom: 15px; 
+            letter-spacing: 0.1em; 
+            font-size: 2.4em; 
+            font-weight: 700;
+        }
+        
+        .subtitle { 
+            text-align: center; 
+            color: var(--secondary); 
+            margin-bottom: 50px; 
+            font-size: 1.1em; 
+            border-bottom: 1px solid var(--border-color); 
+            padding-bottom: 25px; 
+            font-weight: 500;
+        }
+        
+        h2 { 
+            font-size: 1.5em; 
+            color: var(--primary); 
+            margin: 50px 0 25px 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px;
+            background: transparent;
+            padding: 5px 0 5px 15px;
+            border-left: 4px solid var(--wabi-moss);
+            font-weight: 700;
+        }
+
+        /* 輸入區 */
+        .input-group { 
+            background: #F9F8F4; 
+            padding: 40px; 
+            border-radius: 8px; 
+            text-align: center; 
+            margin-bottom: 50px; 
+            display: flex; 
+            justify-content: center; 
+            gap: 30px; 
+            flex-wrap: wrap; 
+            align-items: flex-end; 
+            border: 1px solid var(--border-color);
+        }
+        
+        .input-item { text-align: left; }
+        label { display: block; font-weight: 600; margin-bottom: 10px; font-size: 1em; color: var(--primary); }
+        
+        input { 
+            padding: 12px 20px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 4px; 
+            font-size: 16px; 
+            width: 200px; 
+            outline: none;
+            color: var(--primary);
+            background: var(--card-bg);
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        input:focus { border-color: var(--wabi-indigo); }
+
+        button { 
+            background-color: var(--wabi-moss); 
+            color: #fff; 
+            border: none; 
+            padding: 12px 50px; 
+            font-size: 16px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            height: 50px; 
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: 0.3s; 
+            font-family: inherit;
+        }
+        button:hover { 
+            background-color: #db9b59; 
+            transform: translateY(-2px); 
+        }
+        
+        .btn-capture {
+            background-color: var(--wabi-moss);
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .btn-capture:hover { background-color: #db9b59; }
+        .btn-capture:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* --- 個人資訊欄 (置於頂部) --- */
+        .profile-summary {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* 內容置中 */
+            gap: 40px;
+            margin-bottom: 40px;
+            padding: 15px 30px;
+            background-color: #F9F8F6;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .profile-item {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            font-family: "Noto Serif JP", serif;
+        }
+
+        .profile-label { font-size: 1.2em; color: var(--secondary); font-weight: 600; }
+        .profile-value { font-size: 1.6em; color: var(--primary); font-weight: 700; letter-spacing: 1px; }
+        .highlight-name { color: var(--wabi-indigo); }
+        .highlight-age { color: var(--wabi-indigo); }
+
+        /* 專屬稱呼標題 (截圖時顯示) */
+        #userNameTitle {
+            text-align: center;
+            margin-bottom: 20px;
+            display: none; 
+        }
+
+        /* 儀表板 */
+        .top-section { display: flex; gap: 50px; margin-bottom: 40px; align-items: start; }
+        .left-panel { flex: 1; }
+        .right-panel { flex: 1; display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; }
+
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .stat-card { 
+            background: var(--card-bg); 
+            color: var(--primary); 
+            padding: 25px 20px; 
+            border-radius: 6px; 
+            text-align: center; 
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #ddd; }
+        
+        .stat-card.main::after { background: var(--wabi-moss); } 
+        .stat-card.main .stat-num { color: var(--wabi-moss); }
+        .stat-card.talent::after { background: var(--wabi-gold); } 
+        .stat-card.talent .stat-num { color: var(--wabi-gold); }
+        .stat-card.inner::after { background: var(--wabi-moss); } 
+        .stat-card.inner .stat-num { color: var(--wabi-moss); }
+        .stat-card.flow::after { background: var(--wabi-go); } 
+        .stat-card.flow .stat-num { color: var(--wabi-go); }
+
+        .stat-num { font-size: 3.2em; font-weight: 700; display: block; line-height: 1; margin-bottom: 15px; font-family: "Noto Serif JP", serif;}
+        .stat-label { font-size: 1.4em; font-weight: 600; color: var(--secondary); letter-spacing: 1px; }
+
+        /* --- 九宮格 (放大版) --- */
+        .grid-wrapper { display: flex; justify-content: center; width: 100%; }
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; 
+            width: 360px; /* 寬度 */
+            background-color: var(--border-color); 
+            padding: 10px; 
+            border-radius: 6px; 
+        }
+        .grid-cell { 
+            background-color: var(--card-bg); 
+            height: 100px; /* 高度 */
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 36px; /* 字體 */
+            font-weight: 700; 
+            color: #EBE9E1; 
+            border-radius: 4px; 
+            font-family: "Noto Serif JP", serif;
+            position: relative;
+        }
+        .grid-cell.active { color: var(--primary); background-color: #F2F0EB; border: 1px solid var(--wabi-gold); }
+        .grid-cell .count { position: absolute; top: 5px; right: 8px; font-size: 16px; color: var(--secondary); }
+
+        /* 表格樣式 */
+        .stage-table-container { width: 100%; margin-top: 30px; border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden; }
+        .stage-grid { display: grid; grid-template-columns: 110px repeat(4, 1fr); width: 100%; min-width: 600px; }
+        .stage-cell { padding: 20px 10px; text-align: center; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; flex-direction: column; background: var(--card-bg); font-size: 1.3em; }
+        .stage-header-col { background-color: var(--primary); color: var(--bg); font-weight: 600; }
+        .stage-header-row { background-color: var(--wabi-indigo); color: var(--bg); font-weight: 600; }
+        .stage-label { font-weight: 700; font-size: 1.4em; background-color: #F4F1E8; color: var(--primary); }
+        .stage-data-high { background-color: #fff; color: var(--highlight-pos); font-weight: 700; font-size: 1.8em; font-family: "Noto Serif JP", serif;}
+        .stage-data-kung { background-color: #fff; color: var(--highlight-neg); font-weight: 700; font-size: 1.8em; font-family: "Noto Serif JP", serif;}
+        .age-range { font-size: 0.9em; opacity: 0.8; margin-top: 8px; font-weight: normal; background: rgba(0,0,0,0.1); padding: 3px 10px; border-radius: 4px; letter-spacing: 0.5px;}
+
+        .copyright { margin-top: 60px; font-size: 1.0em; color: var(--secondary); text-align: center; padding-bottom: 10px; border-top: 1px solid var(--border-color); padding-top: 30px; }
+
+        /* 手機版樣式 (原生響應式) */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 30px 20px; }
+            h1 { font-size: 1.5em; }
+            .input-group { flex-direction: column; gap: 20px; padding: 30px 20px; align-items: flex-start; justify-content: flex-start;}
+            .input-item, input, button { width: 95%; max-width: 100%; }
+            .top-section { flex-direction: column; gap: 30px; }
+            .right-panel { width: 100%; }
+            .dashboard { grid-template-columns: 1fr 1fr !important; gap: 15px; }
+            .stat-num { font-size: 2.5em; }
+            
+            .grid-container { width: 100%; max-width: 360px; margin: 0 auto; }
+
+            .stage-table-container { border: 0; margin-top: 10px; }
+            .stage-grid { display: flex; flex-direction: column; min-width: unset; gap: 20px; }
+            .stage-header-row { display: none; }
+            .mobile-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; }
+            .mobile-card-title { grid-column: 1 / -1; background: var(--wabi-indigo); color: var(--bg); padding: 12px; text-align: center; font-weight: 600; }
+            .mobile-row { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 10px; border-right: 1px solid var(--border-color); }
+            .mobile-row:last-child { border-right: none; }
+            .mobile-label { font-size: 1.3em; color: var(--secondary); margin-bottom: 8px; font-weight: 600; }
+            
+            .profile-summary { flex-direction: column; gap: 15px; }
+        }
+
+        /* ★★★ 強制電腦版樣式 (截圖專用) ★★★ */
+        body.force-desktop { 
+            width: 1280px !important; 
+            max-width: none !important;
+        }
+        
+        body.force-desktop .container { 
+            width: 1200px !important;
+            max-width: 1200px !important;
+            padding: 60px 50px !important;
+            margin: 0 auto;
+        }
+
+        /* 強制回復橫排 */
+        body.force-desktop .top-section { 
+            flex-direction: row !important; 
+            gap: 50px !important; 
+        }
+        
+        body.force-desktop .profile-summary { 
+            flex-direction: row !important; 
+            gap: 40px !important; 
+        }
+
+        body.force-desktop .stage-grid { 
+            display: grid !important;
+            grid-template-columns: 110px repeat(4, 1fr) !important;
+        }
+
+        body.force-desktop .stage-header-row { display: flex !important; }
+
+        /* 隱藏手機版卡片，顯示電腦版表格 */
+        body.force-desktop .mobile-view { display: none !important; }
+        body.force-desktop .desktop-view { display: block !important; }
+
+        /* 恢復字體大小 */
+        body.force-desktop h1 { font-size: 2.4em !important; }
+
+        
+        #output { display: none; }
+        .mobile-view { display: none; }
+        .desktop-view { display: block; }
+        
+        @media (max-width: 768px) {
+            .mobile-view { display: block; }
+            .desktop-view { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="capture-area">
+    <h1 id="mainTitle">🌹 生命密碼・靈魂藍圖</h1>
+    <div class="subtitle" id="mainSubtitle">探索內在的本質與流動</div>
+    
+    <div class="input-group" id="inputSection">
+        <div class="input-item">
+            <label><i class="fas fa-user" style="margin-right: 8px; opacity: 0.7;"></i>您的稱呼</label>
+            <input type="text" id="username">
+        </div>
+        <div class="input-item">
+            <label><i class="fas fa-calendar-alt" style="margin-right: 8px; opacity: 0.7;"></i>西元出生日期</label>
+            <input type="date" id="birthdate">
+        </div>
+        <button onclick="analyze()">開始探索</button>
+    </div>
+
+    <div id="output">
+        
+        <div class="profile-summary" id="profileSummaryBar">
+            <div class="profile-item">
+                <span class="profile-label">姓名</span>
+                <span class="profile-value highlight-name" id="displayName"></span>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">生日</span>
+                <span class="profile-value" id="displayBirthday"></span>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">年齡</span>
+                <span class="profile-value highlight-age" id="displayAge"></span>
+            </div>
+        </div>
+
+        <div id="userNameTitle"></div>
+
+        <div class="top-section">
+            <div class="left-panel">
+                <h2 class="matrix-title">I. 核心本質</h2>
+
+                <div class="dashboard">
+                    <div class="stat-card main">
+                        <span class="stat-num" id="lifePathDisplay">?</span>
+                        <span class="stat-label">本命密碼</span>
+                    </div>
+                    <div class="stat-card talent">
+                        <span class="stat-num" id="talentDisplay">?</span>
+                        <span class="stat-label">意識特質</span>
+                    </div>
+                    <div class="stat-card inner">
+                        <span class="stat-num" id="innerCodeDisplay">?</span>
+                        <span class="stat-label">內在密碼</span>
+                    </div>
+                    <div class="stat-card flow">
+                        <span class="stat-num" id="personalYearNum">?</span>
+                        <span class="stat-label">能量小流年</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div style="width: 100%; max-width: 360px;"> 
+                    <h2>II. 本格能量與特質</h2>
+                    <div class="grid-wrapper">
+                        <div class="grid-container">
+                            <div class="grid-cell" id="cell-1">1<span class="count"></span></div>
+                            <div class="grid-cell" id="cell-2">2<span class="count"></span></div>
+                            <div class="grid-cell" id="cell-3">3<span class="count"></span></div>
+                            <div class="grid-cell" id="cell-4">4<span class="count"></span></div>
+                            <div class="grid-cell" id="cell-5">5<span class="count"></span></div>
+                            <div class="grid-cell" id="cell-6">6<span class="count"></span></div>
+                            <div class="grid-cell" id="cell-7">7<span class="count"></span></div>
+                            <div class="grid-cell" id="cell-8">8<span class="count"></span></div>
+                            <div class="grid-cell" id="cell-9">9<span class="count"></span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>III. 脈絡區間能量帶</h2>
+        <div id="stageOutput"></div>
+
+        <button onclick="captureScreenshot()" class="btn-capture" id="captureBtn">
+            <i class="fas fa-camera"></i> 下載分析圖卡
+        </button>
+
+    </div>
+
+    <div class="copyright">
+        &copy; <span id="curYear"></span> Amy ChiChi、358意識實驗樹. All Rights Reserved.
+    </div>
+</div>
+
+<script>
+    document.getElementById('curYear').innerText = new Date().getFullYear();
+
+    function reduceNumber(num) {
+        while (num > 9) {
+            num = num.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+        }
+        return num;
+    }
+    
+    function processKung(num) {
+        let reduced = reduceNumber(num);
+        return reduced === 0 ? 9 : reduced;
+    }
+
+    // 計算年齡
+    function calculateAge(birthDate) {
+        const today = new Date();
+        const birth = new Date(birthDate);
+        let age = today.getFullYear() - birth.getFullYear();
+        const m = today.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+            age--;
+        }
+        return age;
+    }
+
+    function analyze() {
+        const dateInput = document.getElementById('birthdate').value;
+        const username = document.getElementById('username').value.trim();
+        const targetYear = new Date().getFullYear(); 
+    
+        if (!dateInput) { alert("請輸入出生日期"); return; }
+
+        document.getElementById('output').style.display = "block";
+
+        const [yearStr, monthStr, dayStr] = dateInput.split('-');
+        const year = parseInt(yearStr);
+        const month = parseInt(monthStr);
+        const day = parseInt(dayStr);
+        const fullDateStr = yearStr + monthStr + dayStr;
+
+        // ★ 填入個人資訊摘要
+        document.getElementById('displayName').innerText = username ? username : "探索者";
+        document.getElementById('displayBirthday').innerText = `${yearStr}/${monthStr}/${dayStr}`;
+        document.getElementById('displayAge').innerText = calculateAge(dateInput) + " 歲";
+
+        let totalSum = 0;
+        for (let char of fullDateStr) totalSum += parseInt(char);
+        const talentNum = totalSum;
+        const lifePath = reduceNumber(talentNum); 
+        const innerCode = reduceNumber(day); 
+        
+        const targetYearSum = reduceNumber(targetYear);
+        const monthSum = reduceNumber(month);
+        const daySum = reduceNumber(day);
+        const py = reduceNumber(targetYearSum + monthSum + daySum);
+
+        document.getElementById('lifePathDisplay').innerText = lifePath;
+        document.getElementById('talentDisplay').innerText = talentNum;
+        document.getElementById('innerCodeDisplay').innerText = innerCode;
+        document.getElementById('personalYearNum').innerText = py;
+        
+        let counts = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0};
+        for(let c of fullDateStr) if(c!=='0') counts[parseInt(c)]++;
+        
+        let current = totalSum;
+        while (true) {
+            let s = current.toString();
+            for(let c of s) if(c !== '0') counts[parseInt(c)]++; 
+            if (current <= 9) break; 
+            let next = 0;
+            for(let c of s) next += parseInt(c);
+            current = next;
+        }
+
+        for(let i=1; i<=9; i++) {
+            const cell = document.getElementById(`cell-${i}`);
+            const countSpan = cell.querySelector('.count');
+            if(counts[i]>0) {
+                cell.classList.add('active');
+                countSpan.innerText = counts[i] > 1 ? `x${counts[i]}` : '';
+            } else {
+                cell.classList.remove('active');
+                countSpan.innerText = "";
+            }
+        }
+
+        // 計算表格
+        let a = reduceNumber(month);
+        let b = reduceNumber(day);
+        let c = reduceNumber(year);
+
+        let age1_end = 36 - lifePath;
+        let age_range_1 = `0 ~ ${age1_end} 歲`;
+        let age2_start = age1_end + 1;
+        let age2_end = age1_end + 9;
+        let age_range_2 = `${age2_start} ~ ${age2_end} 歲`;
+        let age3_start = age2_end + 1; 
+        let age3_end = age2_end + 9;
+        let age_range_3 = `${age3_start} ~ ${age3_end} 歲`;
+        let age4_start = age3_end + 1;
+        let age_range_4 = `${age4_start} 歲以後`;
+
+        let h1 = reduceNumber(a + b);
+        let h2 = reduceNumber(c + b);
+        let h3 = reduceNumber(h1 + h2);
+        let h4 = reduceNumber(a + c);
+
+        let k1 = processKung(Math.abs(a - b));
+        let k2 = processKung(Math.abs(c - b));
+        let k3 = processKung(Math.abs(k1 - k2));
+        let k4 = processKung(Math.abs(a - c));
+
+        const stageOutput = document.getElementById('stageOutput');
+        
+        let html = `
+        <div class="stage-table-container">
+            <div class="stage-grid">
+                <div class="stage-cell stage-header-col"></div>
+                <div class="stage-cell stage-header-row">第一階段 養成期 <br><span class="age-range">${age_range_1}</span></div>
+                <div class="stage-cell stage-header-row">第二階段 探索期 <br><span class="age-range">${age_range_2}</span></div>
+                <div class="stage-cell stage-header-row">第三階段 轉折期 <br><span class="age-range">${age_range_3}</span></div>
+                <div class="stage-cell stage-header-row">第四階段 整合期 <br><span class="age-range">${age_range_4}</span></div>
+
+                <div class="stage-cell stage-label">高能</div>
+                <div class="stage-cell stage-data-high">${h1}</div>
+                <div class="stage-cell stage-data-high">${h2}</div>
+                <div class="stage-cell stage-data-high">${h3}</div>
+                <div class="stage-cell stage-data-high">${h4}</div>
+
+                <div class="stage-cell stage-label">功課</div>
+                <div class="stage-cell stage-data-kung">${k1}</div>
+                <div class="stage-cell stage-data-kung">${k2}</div>
+                <div class="stage-cell stage-data-kung">${k3}</div>
+                <div class="stage-cell stage-data-kung">${k4}</div>
+            </div>
+        </div>
+        `;
+
+        let mobileHtml = `
+        <div class="stage-grid mobile-only">
+            <div class="mobile-card">
+                <div class="mobile-card-title">第一階段 養成期 (${age_range_1})</div>
+                <div class="mobile-row">
+                    <span class="mobile-label">高能</span>
+                    <span class="stage-data-high">${h1}</span>
+                </div>
+                <div class="mobile-row" style="background:#F9F8F6;">
+                    <span class="mobile-label">功課</span>
+                    <span class="stage-data-kung">${k1}</span>
+                </div>
+            </div>
+            <div class="mobile-card">
+                <div class="mobile-card-title">第二階段 探索期 (${age_range_2})</div>
+                <div class="mobile-row">
+                    <span class="mobile-label">高能</span>
+                    <span class="stage-data-high">${h2}</span>
+                </div>
+                <div class="mobile-row" style="background:#F9F8F6;">
+                    <span class="mobile-label">功課</span>
+                    <span class="stage-data-kung">${k2}</span>
+                </div>
+            </div>
+            <div class="mobile-card">
+                <div class="mobile-card-title">第三階段 轉折期 (${age_range_3})</div>
+                <div class="mobile-row">
+                    <span class="mobile-label">高能</span>
+                    <span class="stage-data-high">${h3}</span>
+                </div>
+                <div class="mobile-row" style="background:#F9F8F6;">
+                    <span class="mobile-label">功課</span>
+                    <span class="stage-data-kung">${k3}</span>
+                </div>
+            </div>
+            <div class="mobile-card">
+                <div class="mobile-card-title">第四階段 整合期 (${age_range_4})</div>
+                <div class="mobile-row">
+                    <span class="mobile-label">高能</span>
+                    <span class="stage-data-high">${h4}</span>
+                </div>
+                <div class="mobile-row" style="background:#F9F8F6;">
+                    <span class="mobile-label">功課</span>
+                    <span class="stage-data-kung">${k4}</span>
+                </div>
+            </div>
+        </div>
+        `;
+
+        stageOutput.innerHTML = `
+            <div class="desktop-view">${html}</div>
+            <div class="mobile-view">${mobileHtml}</div>
+        `;
+
+        document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- 修正後的截圖功能 (強制電腦版格式) ---
+    function captureScreenshot() {
+        const userName = document.getElementById('username').value.trim();
+        const finalName = userName ? userName : "探索者";
+        
+        // 抓取已計算好的資料
+        const bdayText = document.getElementById('displayBirthday').innerText;
+        const ageText = document.getElementById('displayAge').innerText;
+
+        const captureElement = document.getElementById('capture-area');
+        const inputSection = document.getElementById('inputSection');
+        const mainTitle = document.getElementById('mainTitle');
+        const mainSubtitle = document.getElementById('mainSubtitle');
+        const userNameTitle = document.getElementById('userNameTitle');
+        const summaryBar = document.getElementById('profileSummaryBar'); 
+        const btn = document.getElementById('captureBtn');
+
+        const originalBtnText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 處理中...';
+        btn.disabled = true;
+
+        // ★★★ 關鍵：加入 force-desktop 類別，強制展開為電腦版寬度與排列 ★★★
+        document.body.classList.add('force-desktop');
+
+        // 1. 隱藏不必要的元素
+        inputSection.style.display = 'none';
+        btn.style.display = 'none';
+        mainTitle.style.display = 'none';
+        mainSubtitle.style.display = 'none';
+        summaryBar.style.display = 'none';
+
+        // 2. 設定專屬標題 (加入生日與歲數)
+        userNameTitle.innerHTML = `
+            <div style="font-size: 2.0em; color: #9F7D5C; font-weight: 700;">🌹 ${finalName} 的生命劇本</div>
+            <div style="font-size: 1.5em; margin-top: 15px; color: #78726B; font-weight: normal; letter-spacing: 1px; font-family: 'Noto Serif JP', serif;">
+                ${bdayText} &nbsp;|&nbsp; ${ageText}
+            </div>
+        `;
+        userNameTitle.style.display = 'block';
+
+        // 3. 強制滾動到頂部 (避免截圖空白)
+        window.scrollTo(0, 0);
+
+        // 4. 延遲執行截圖 (等待 CSS 撐開完成)
+        setTimeout(() => {
+            html2canvas(captureElement, { 
+                scale: 2, 
+                backgroundColor: '#F4F1E8',
+                useCORS: true,
+                scrollY: 0,
+                // ★ 告訴截圖引擎，請用 1280px 的視窗寬度來渲染 (模擬電腦螢幕)
+                windowWidth: 1280,
+                width: 1280
+            }).then(canvas => {
+                // 5. 恢復介面
+                document.body.classList.remove('force-desktop'); // 移除強制寬度
+                
+                inputSection.style.display = 'flex';
+                btn.style.display = 'flex';
+                mainTitle.style.display = 'block';
+                mainSubtitle.style.display = 'block';
+                summaryBar.style.display = 'flex';
+                userNameTitle.style.display = 'none';
+                
+                btn.innerHTML = originalBtnText;
+                btn.disabled = false;
+
+                // 6. 下載圖片
+                const image = canvas.toDataURL("image/png");
+                const link = document.createElement('a');
+                link.download = `${finalName}的生命劇本.png`;
+                link.href = image;
+                link.click();
+            }).catch(err => {
+                alert("截圖發生錯誤：" + err);
+                // 發生錯誤也要記得復原
+                document.body.classList.remove('force-desktop');
+                inputSection.style.display = 'flex';
+                btn.style.display = 'flex';
+                mainTitle.style.display = 'block';
+                mainSubtitle.style.display = 'block';
+                summaryBar.style.display = 'flex';
+                userNameTitle.style.display = 'none';
+                btn.innerHTML = originalBtnText;
+                btn.disabled = false;
+            });
+        }, 800); 
+    }
+</script>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div style="display: none;">
+    <span id="busuanzi_container_site_pv">
+        本站總瀏覽量：<span id="busuanzi_value_site_pv"></span> 次
+    </span>
+    <span id="busuanzi_container_site_uv">
+        訪客數：<span id="busuanzi_value_site_uv"></span> 人
+    </span>
+</div>
+
+</body>
+</html>
