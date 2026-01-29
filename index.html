@@ -28,6 +28,11 @@
             
             --highlight-pos: #b56355; /* 墨綠 */
             --highlight-neg: #543b3e; /* 赤紅 */
+            
+            /* 階段顏色 */
+            --stage-default-bg: #b5556b; 
+            --stage-current-bg: #D98E28; /* 當下階段 */
+            --stage-next-bg: #803528;    /* 跨階預備 */
         }
 
         body { 
@@ -36,7 +41,7 @@
             color: var(--primary); 
             padding: 20px; 
             line-height: 1.9; 
-            overflow-x: hidden; /* 避免撐開時出現卷軸 */
+            overflow-x: hidden; 
         }
 
         .container { 
@@ -145,11 +150,11 @@
         .btn-capture:hover { background-color: #db9b59; }
         .btn-capture:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        /* --- 個人資訊欄 (置於頂部) --- */
+        /* --- 個人資訊欄 --- */
         .profile-summary {
             display: flex;
             align-items: center;
-            justify-content: center; /* 內容置中 */
+            justify-content: center; 
             gap: 40px;
             margin-bottom: 40px;
             padding: 15px 30px;
@@ -170,12 +175,7 @@
         .highlight-name { color: var(--wabi-indigo); }
         .highlight-age { color: var(--wabi-indigo); }
 
-        /* 專屬稱呼標題 (截圖時顯示) */
-        #userNameTitle {
-            text-align: center;
-            margin-bottom: 20px;
-            display: none; 
-        }
+        #userNameTitle { text-align: center; margin-bottom: 20px; display: none; }
 
         /* 儀表板 */
         .top-section { display: flex; gap: 50px; margin-bottom: 40px; align-items: start; }
@@ -207,24 +207,24 @@
         .stat-num { font-size: 3.2em; font-weight: 700; display: block; line-height: 1; margin-bottom: 15px; font-family: "Noto Serif JP", serif;}
         .stat-label { font-size: 1.4em; font-weight: 600; color: var(--secondary); letter-spacing: 1px; }
 
-        /* --- 九宮格 (放大版) --- */
+        /* --- 九宮格 --- */
         .grid-wrapper { display: flex; justify-content: center; width: 100%; }
         .grid-container { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
             gap: 10px; 
-            width: 360px; /* 寬度 */
+            width: 360px; 
             background-color: var(--border-color); 
             padding: 10px; 
             border-radius: 6px; 
         }
         .grid-cell { 
             background-color: var(--card-bg); 
-            height: 100px; /* 高度 */
+            height: 100px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 36px; /* 字體 */
+            font-size: 36px; 
             font-weight: 700; 
             color: #EBE9E1; 
             border-radius: 4px; 
@@ -239,15 +239,67 @@
         .stage-grid { display: grid; grid-template-columns: 110px repeat(4, 1fr); width: 100%; min-width: 600px; }
         .stage-cell { padding: 20px 10px; text-align: center; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; flex-direction: column; background: var(--card-bg); font-size: 1.3em; }
         .stage-header-col { background-color: var(--primary); color: var(--bg); font-weight: 600; }
-        .stage-header-row { background-color: var(--wabi-indigo); color: var(--bg); font-weight: 600; }
+        
+        /* 標題列 (電腦版) - 加大上方空間 */
+        .stage-header-row { 
+            background-color: var(--stage-default-bg); 
+            color: var(--bg); 
+            font-weight: 600; 
+            transition: 0.3s;
+            position: relative;
+            /* ★★★ 修改重點：上方內距加大，把文字往下推 */
+            padding-top: 50px; 
+        }
+        
+        .stage-current { background-color: var(--stage-current-bg) !important; }
+        .stage-next { background-color: var(--stage-next-bg) !important; animation: pulse-gold 2s infinite; }
+        
+        @keyframes pulse-gold {
+            0% { box-shadow: inset 0 0 0 0 rgba(255, 255, 255, 0.4); }
+            70% { box-shadow: inset 0 0 20px 0 rgba(255, 255, 255, 0); }
+            100% { box-shadow: inset 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        /* ★★★ 標籤樣式 (位置調整) ★★★ */
+        .status-badge {
+            position: absolute;
+            /* ★★★ 修改重點：位置往上拉高，不要壓到字 */
+            top: 4px; 
+            right: 4px;
+            background: rgba(0,0,0,0.25);
+            color: #fff;
+            font-size: 0.75em; 
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: bold; 
+            letter-spacing: 1px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .trans-badge {
+            position: absolute;
+            /* ★★★ 修改重點：位置往上拉高 */
+            top: 4px;
+            left: 4px;
+            background: rgba(255,255,255,0.25);
+            color: #fff;
+            font-size: 0.75em; 
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-weight: bold; 
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         .stage-label { font-weight: 700; font-size: 1.4em; background-color: #F4F1E8; color: var(--primary); }
         .stage-data-high { background-color: #fff; color: var(--highlight-pos); font-weight: 700; font-size: 1.8em; font-family: "Noto Serif JP", serif;}
         .stage-data-kung { background-color: #fff; color: var(--highlight-neg); font-weight: 700; font-size: 1.8em; font-family: "Noto Serif JP", serif;}
-        .age-range { font-size: 0.9em; opacity: 0.8; margin-top: 8px; font-weight: normal; background: rgba(0,0,0,0.1); padding: 3px 10px; border-radius: 4px; letter-spacing: 0.5px;}
+        .age-range { font-size: 0.9em; opacity: 0.8; margin-top: 5px; font-weight: normal; background: rgba(0,0,0,0.1); padding: 3px 10px; border-radius: 4px; letter-spacing: 0.5px;}
 
         .copyright { margin-top: 60px; font-size: 1.0em; color: var(--secondary); text-align: center; padding-bottom: 10px; border-top: 1px solid var(--border-color); padding-top: 30px; }
 
-        /* 手機版樣式 (原生響應式) */
+        /* 手機版樣式 */
         @media (max-width: 768px) {
             body { padding: 10px; }
             .container { padding: 30px 20px; }
@@ -258,14 +310,25 @@
             .right-panel { width: 100%; }
             .dashboard { grid-template-columns: 1fr 1fr !important; gap: 15px; }
             .stat-num { font-size: 2.5em; }
-            
             .grid-container { width: 100%; max-width: 360px; margin: 0 auto; }
 
             .stage-table-container { border: 0; margin-top: 10px; }
             .stage-grid { display: flex; flex-direction: column; min-width: unset; gap: 20px; }
             .stage-header-row { display: none; }
             .mobile-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; }
-            .mobile-card-title { grid-column: 1 / -1; background: var(--wabi-indigo); color: var(--bg); padding: 12px; text-align: center; font-weight: 600; }
+            
+            /* 手機版標題 - 加大上方空間 */
+            .mobile-card-title { 
+                grid-column: 1 / -1; 
+                background: var(--stage-default-bg); 
+                color: var(--bg); 
+                /* ★★★ 修改重點：上方內距從 15px 改為 45px，大幅增加空間 */
+                padding: 45px 12px 15px 12px; 
+                text-align: center; 
+                font-weight: 600; 
+                position: relative;
+            }
+            
             .mobile-row { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 10px; border-right: 1px solid var(--border-color); }
             .mobile-row:last-child { border-right: none; }
             .mobile-label { font-size: 1.3em; color: var(--secondary); margin-bottom: 8px; font-weight: 600; }
@@ -273,45 +336,17 @@
             .profile-summary { flex-direction: column; gap: 15px; }
         }
 
-        /* ★★★ 強制電腦版樣式 (截圖專用) ★★★ */
-        body.force-desktop { 
-            width: 1280px !important; 
-            max-width: none !important;
-        }
-        
-        body.force-desktop .container { 
-            width: 1200px !important;
-            max-width: 1200px !important;
-            padding: 60px 50px !important;
-            margin: 0 auto;
-        }
-
-        /* 強制回復橫排 */
-        body.force-desktop .top-section { 
-            flex-direction: row !important; 
-            gap: 50px !important; 
-        }
-        
-        body.force-desktop .profile-summary { 
-            flex-direction: row !important; 
-            gap: 40px !important; 
-        }
-
-        body.force-desktop .stage-grid { 
-            display: grid !important;
-            grid-template-columns: 110px repeat(4, 1fr) !important;
-        }
-
+        /* 強制電腦版樣式 */
+        body.force-desktop { width: 1280px !important; max-width: none !important; }
+        body.force-desktop .container { width: 1200px !important; max-width: 1200px !important; padding: 60px 50px !important; margin: 0 auto; }
+        body.force-desktop .top-section { flex-direction: row !important; gap: 50px !important; }
+        body.force-desktop .profile-summary { flex-direction: row !important; gap: 40px !important; }
+        body.force-desktop .stage-grid { display: grid !important; grid-template-columns: 110px repeat(4, 1fr) !important; }
         body.force-desktop .stage-header-row { display: flex !important; }
-
-        /* 隱藏手機版卡片，顯示電腦版表格 */
         body.force-desktop .mobile-view { display: none !important; }
         body.force-desktop .desktop-view { display: block !important; }
-
-        /* 恢復字體大小 */
         body.force-desktop h1 { font-size: 2.4em !important; }
 
-        
         #output { display: none; }
         .mobile-view { display: none; }
         .desktop-view { display: block; }
@@ -413,7 +448,7 @@
     </div>
 
     <div class="copyright">
-        &copy; <span id="curYear"></span> Amy ChiChi. All Rights Reserved.
+        &copy; <span id="curYear"></span> Amy ChiChi、358意識實驗樹. All Rights Reserved.
     </div>
 </div>
 
@@ -432,22 +467,34 @@
         return reduced === 0 ? 9 : reduced;
     }
 
-    // 計算年齡
-    function calculateAge(birthDate) {
+    // 計算詳細年齡 (歲 + 月)
+    function calculateFullAge(birthDate) {
         const today = new Date();
         const birth = new Date(birthDate);
-        let age = today.getFullYear() - birth.getFullYear();
-        const m = today.getMonth() - birth.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-            age--;
+        
+        let years = today.getFullYear() - birth.getFullYear();
+        let months = today.getMonth() - birth.getMonth();
+        
+        if (months < 0 || (months === 0 && today.getDate() < birth.getDate())) {
+            years--;
+            months += 12;
         }
-        return age;
+        
+        if (today.getDate() < birth.getDate()) {
+            months--;
+            if(months < 0) { 
+                months += 12;
+            }
+        }
+        
+        return { years, months };
     }
 
     function analyze() {
         const dateInput = document.getElementById('birthdate').value;
         const username = document.getElementById('username').value.trim();
         const targetYear = new Date().getFullYear(); 
+        const today = new Date(); 
     
         if (!dateInput) { alert("請輸入出生日期"); return; }
 
@@ -459,10 +506,11 @@
         const day = parseInt(dayStr);
         const fullDateStr = yearStr + monthStr + dayStr;
 
-        // ★ 填入個人資訊摘要
+        // 顯示年齡
+        const ageObj = calculateFullAge(dateInput);
         document.getElementById('displayName').innerText = username ? username : "探索者";
         document.getElementById('displayBirthday').innerText = `${yearStr}/${monthStr}/${dayStr}`;
-        document.getElementById('displayAge').innerText = calculateAge(dateInput) + " 歲";
+        document.getElementById('displayAge').innerText = `${ageObj.years} 歲 ${ageObj.months} 個月`;
 
         let totalSum = 0;
         for (let char of fullDateStr) totalSum += parseInt(char);
@@ -505,21 +553,19 @@
             }
         }
 
-        // 計算表格
+        // --- 階段計算 ---
         let a = reduceNumber(month);
         let b = reduceNumber(day);
         let c = reduceNumber(year);
 
         let age1_end = 36 - lifePath;
-        let age_range_1 = `0 ~ ${age1_end} 歲`;
-        let age2_start = age1_end + 1;
         let age2_end = age1_end + 9;
-        let age_range_2 = `${age2_start} ~ ${age2_end} 歲`;
-        let age3_start = age2_end + 1; 
         let age3_end = age2_end + 9;
-        let age_range_3 = `${age3_start} ~ ${age3_end} 歲`;
-        let age4_start = age3_end + 1;
-        let age_range_4 = `${age4_start} 歲以後`;
+
+        let age_range_1 = `0 ~ ${age1_end} 歲`;
+        let age_range_2 = `${age1_end + 1} ~ ${age2_end} 歲`;
+        let age_range_3 = `${age2_end + 1} ~ ${age3_end} 歲`;
+        let age_range_4 = `${age3_end + 1} 歲以後`;
 
         let h1 = reduceNumber(a + b);
         let h2 = reduceNumber(c + b);
@@ -531,16 +577,79 @@
         let k3 = processKung(Math.abs(k1 - k2));
         let k4 = processKung(Math.abs(a - c));
 
+        // 階段判斷邏輯
+        const birthDateObj = new Date(dateInput);
+        
+        function getStageEndDate(endAge) {
+            let d = new Date(birthDateObj);
+            d.setFullYear(d.getFullYear() + endAge + 1);
+            return d;
+        }
+
+        const dateStage1End = getStageEndDate(age1_end);
+        const dateStage2End = getStageEndDate(age2_end);
+        const dateStage3End = getStageEndDate(age3_end);
+        
+        let currentStageIdx = 4;
+        if (today < dateStage1End) currentStageIdx = 1;
+        else if (today < dateStage2End) currentStageIdx = 2;
+        else if (today < dateStage3End) currentStageIdx = 3;
+        else currentStageIdx = 4;
+
+        let isTransitioning = false;
+        const oneYearMs = 365 * 24 * 60 * 60 * 1000;
+
+        if (currentStageIdx === 1) {
+            if (dateStage1End - today < oneYearMs) isTransitioning = true;
+        } else if (currentStageIdx === 2) {
+            if (dateStage2End - today < oneYearMs) isTransitioning = true;
+        } else if (currentStageIdx === 3) {
+            if (dateStage3End - today < oneYearMs) isTransitioning = true;
+        }
+
+        function getStageClass(stageIdx) {
+            if (stageIdx === currentStageIdx) return "stage-current";
+            if (isTransitioning && stageIdx === currentStageIdx + 1) return "stage-next";
+            return "";
+        }
+
+        function getCurrentBadge(stageIdx) {
+            if (stageIdx === currentStageIdx) {
+                return '<span class="status-badge">現階段</span>';
+            }
+            return "";
+        }
+
+        function getTransIcon(stageIdx) {
+             if (isTransitioning && stageIdx === currentStageIdx + 1) {
+                 return '<span class="trans-badge"><i class="fas fa-angle-double-right"></i>邁入階段</span>';
+             }
+             return "";
+        }
+
         const stageOutput = document.getElementById('stageOutput');
         
         let html = `
         <div class="stage-table-container">
             <div class="stage-grid">
                 <div class="stage-cell stage-header-col"></div>
-                <div class="stage-cell stage-header-row">第一階段 養成期 <br><span class="age-range">${age_range_1}</span></div>
-                <div class="stage-cell stage-header-row">第二階段 探索期 <br><span class="age-range">${age_range_2}</span></div>
-                <div class="stage-cell stage-header-row">第三階段 轉折期 <br><span class="age-range">${age_range_3}</span></div>
-                <div class="stage-cell stage-header-row">第四階段 整合期 <br><span class="age-range">${age_range_4}</span></div>
+                
+                <div class="stage-cell stage-header-row ${getStageClass(1)}">
+                    ${getCurrentBadge(1)} ${getTransIcon(1)}
+                    第一階段 養成期 <br><span class="age-range">${age_range_1}</span>
+                </div>
+                <div class="stage-cell stage-header-row ${getStageClass(2)}">
+                    ${getCurrentBadge(2)} ${getTransIcon(2)}
+                    第二階段 探索期 <br><span class="age-range">${age_range_2}</span>
+                </div>
+                <div class="stage-cell stage-header-row ${getStageClass(3)}">
+                    ${getCurrentBadge(3)} ${getTransIcon(3)}
+                    第三階段 轉折期 <br><span class="age-range">${age_range_3}</span>
+                </div>
+                <div class="stage-cell stage-header-row ${getStageClass(4)}">
+                    ${getCurrentBadge(4)} ${getTransIcon(4)}
+                    第四階段 整合期 <br><span class="age-range">${age_range_4}</span>
+                </div>
 
                 <div class="stage-cell stage-label">高能</div>
                 <div class="stage-cell stage-data-high">${h1}</div>
@@ -560,7 +669,10 @@
         let mobileHtml = `
         <div class="stage-grid mobile-only">
             <div class="mobile-card">
-                <div class="mobile-card-title">第一階段 養成期 (${age_range_1})</div>
+                <div class="mobile-card-title ${getStageClass(1)}">
+                    ${getCurrentBadge(1)} ${getTransIcon(1)}
+                    第一階段 養成期 (${age_range_1})
+                </div>
                 <div class="mobile-row">
                     <span class="mobile-label">高能</span>
                     <span class="stage-data-high">${h1}</span>
@@ -571,7 +683,10 @@
                 </div>
             </div>
             <div class="mobile-card">
-                <div class="mobile-card-title">第二階段 探索期 (${age_range_2})</div>
+                <div class="mobile-card-title ${getStageClass(2)}">
+                    ${getCurrentBadge(2)} ${getTransIcon(2)}
+                    第二階段 探索期 (${age_range_2})
+                </div>
                 <div class="mobile-row">
                     <span class="mobile-label">高能</span>
                     <span class="stage-data-high">${h2}</span>
@@ -582,7 +697,10 @@
                 </div>
             </div>
             <div class="mobile-card">
-                <div class="mobile-card-title">第三階段 轉折期 (${age_range_3})</div>
+                <div class="mobile-card-title ${getStageClass(3)}">
+                    ${getCurrentBadge(3)} ${getTransIcon(3)}
+                    第三階段 轉折期 (${age_range_3})
+                </div>
                 <div class="mobile-row">
                     <span class="mobile-label">高能</span>
                     <span class="stage-data-high">${h3}</span>
@@ -593,7 +711,10 @@
                 </div>
             </div>
             <div class="mobile-card">
-                <div class="mobile-card-title">第四階段 整合期 (${age_range_4})</div>
+                <div class="mobile-card-title ${getStageClass(4)}">
+                    ${getCurrentBadge(4)} ${getTransIcon(4)}
+                    第四階段 整合期 (${age_range_4})
+                </div>
                 <div class="mobile-row">
                     <span class="mobile-label">高能</span>
                     <span class="stage-data-high">${h4}</span>
@@ -614,12 +735,10 @@
         document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // --- 修正後的截圖功能 (強制電腦版格式) ---
     function captureScreenshot() {
         const userName = document.getElementById('username').value.trim();
         const finalName = userName ? userName : "探索者";
         
-        // 抓取已計算好的資料
         const bdayText = document.getElementById('displayBirthday').innerText;
         const ageText = document.getElementById('displayAge').innerText;
 
@@ -635,17 +754,14 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 處理中...';
         btn.disabled = true;
 
-        // ★★★ 關鍵：加入 force-desktop 類別，強制展開為電腦版寬度與排列 ★★★
         document.body.classList.add('force-desktop');
 
-        // 1. 隱藏不必要的元素
         inputSection.style.display = 'none';
         btn.style.display = 'none';
         mainTitle.style.display = 'none';
         mainSubtitle.style.display = 'none';
         summaryBar.style.display = 'none';
 
-        // 2. 設定專屬標題 (加入生日與歲數)
         userNameTitle.innerHTML = `
             <div style="font-size: 2.0em; color: #9F7D5C; font-weight: 700;">🌹 ${finalName} 的生命劇本</div>
             <div style="font-size: 1.5em; margin-top: 15px; color: #78726B; font-weight: normal; letter-spacing: 1px; font-family: 'Noto Serif JP', serif;">
@@ -654,22 +770,18 @@
         `;
         userNameTitle.style.display = 'block';
 
-        // 3. 強制滾動到頂部 (避免截圖空白)
         window.scrollTo(0, 0);
 
-        // 4. 延遲執行截圖 (等待 CSS 撐開完成)
         setTimeout(() => {
             html2canvas(captureElement, { 
                 scale: 2, 
                 backgroundColor: '#F4F1E8',
                 useCORS: true,
                 scrollY: 0,
-                // ★ 告訴截圖引擎，請用 1280px 的視窗寬度來渲染 (模擬電腦螢幕)
                 windowWidth: 1280,
                 width: 1280
             }).then(canvas => {
-                // 5. 恢復介面
-                document.body.classList.remove('force-desktop'); // 移除強制寬度
+                document.body.classList.remove('force-desktop'); 
                 
                 inputSection.style.display = 'flex';
                 btn.style.display = 'flex';
@@ -681,7 +793,6 @@
                 btn.innerHTML = originalBtnText;
                 btn.disabled = false;
 
-                // 6. 下載圖片
                 const image = canvas.toDataURL("image/png");
                 const link = document.createElement('a');
                 link.download = `${finalName}的生命劇本.png`;
@@ -689,7 +800,6 @@
                 link.click();
             }).catch(err => {
                 alert("截圖發生錯誤：" + err);
-                // 發生錯誤也要記得復原
                 document.body.classList.remove('force-desktop');
                 inputSection.style.display = 'flex';
                 btn.style.display = 'flex';
@@ -714,6 +824,6 @@
     </span>
 </div>
 
-</body>
 
+</body>
 </html>
